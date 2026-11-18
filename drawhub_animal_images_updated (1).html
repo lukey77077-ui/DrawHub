@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DrawHub — Explore Drawing Ideas</title>
+<style>
+:root{--ink:#20213a;--muted:#6e7188;--paper:#f7f7fc;--purple:#6c4cf1;--pink:#ff6f91;--line:#e9e8f2}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:var(--paper);color:var(--ink)}
+header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+nav{max-width:1120px;margin:auto;padding:17px 22px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.logo{font-size:24px;font-weight:900;letter-spacing:-1px}.logo span{color:var(--purple)}
+nav a{color:var(--muted);text-decoration:none;font-weight:650;margin-left:20px;font-size:14px}
+.hero{max-width:1120px;margin:38px auto 24px;padding:50px 28px;border-radius:28px;background:linear-gradient(120deg,#eeeaff,#ffeaf0);position:relative;overflow:hidden}
+.hero:after{content:"✦";position:absolute;right:8%;top:8px;font-size:150px;color:#fff8;transform:rotate(15deg)}
+.hero h1{font-size:clamp(34px,5vw,58px);line-height:1.05;max-width:650px;margin:0 0 14px;letter-spacing:-2px}
+.hero p{color:#5f6077;font-size:17px;max-width:580px;line-height:1.6;margin:0 0 24px}
+.search{display:flex;max-width:600px;background:white;padding:7px;border-radius:14px;box-shadow:0 8px 24px #4d3c8714}
+.search input{flex:1;min-width:0;border:0;outline:0;padding:12px;font-size:15px}.search button,.btn{border:0;background:var(--purple);color:white;padding:12px 20px;border-radius:10px;font-weight:750;cursor:pointer}
+.wrap{max-width:1120px;margin:0 auto;padding:0 22px 50px}
+.section-head{display:flex;align-items:end;justify-content:space-between;gap:12px;margin:34px 0 18px}
+h2{font-size:25px;margin:0;letter-spacing:-.6px}.section-head p{margin:5px 0 0;color:var(--muted);font-size:14px}
+.pencil-inspiration{margin:0 0 20px}.pencil-inspiration img{display:block;max-width:100%;height:auto;border-radius:12px}
+.filters{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:20px}
+.chip{border:1px solid var(--line);background:#fff;color:#55566c;padding:9px 14px;border-radius:999px;cursor:pointer;font-weight:650}
+.chip.active,.chip:hover{background:var(--ink);border-color:var(--ink);color:white}
+.grid,.gallery-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.card,.gallery-card{background:#fff;border:1px solid var(--line);border-radius:18px;overflow:hidden;transition:.2s;box-shadow:0 4px 16px #25234a08}
+.card:hover,.gallery-card:hover{transform:translateY(-4px);box-shadow:0 12px 26px #25234a12}
+.art{height:145px;display:grid;place-items:center;font-size:68px;background:linear-gradient(135deg,#f0edff,#ffeef3)}
+.card:nth-child(4n+2) .art{background:linear-gradient(135deg,#e6f7ff,#effff5)}
+.card:nth-child(4n+3) .art{background:linear-gradient(135deg,#fff3df,#ffe9ed)}
+.card:nth-child(4n+4) .art{background:linear-gradient(135deg,#eaf8ed,#e9efff)}
+.card-body,.card-info{padding:15px}.card h3,.gallery-card h3{margin:0 0 6px;font-size:16px}.card p{margin:0;color:var(--muted);font-size:13px;line-height:1.45}
+.tag,.badge{display:inline-block;margin-top:11px;background:#f1efff;color:#6448d8;padding:5px 9px;border-radius:7px;font-size:11px;font-weight:800;text-transform:capitalize}
+.gallery-card img{display:block;width:100%;height:165px;object-fit:cover;background:#eeeafc}
+.gallery-card .card-info h3{margin:0 0 6px}
+.difficulty{display:inline-block;margin:11px 0 0 5px;color:#6e7188;font-size:11px;font-weight:750}
+.empty{display:none;text-align:center;padding:35px;color:var(--muted);grid-column:1/-1}
+.tip{margin-top:34px;padding:22px;border-radius:18px;background:#22213b;color:#fff;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.tip p{margin:5px 0 0;color:#d3d1e5;font-size:14px}.tip strong{font-size:19px}
+footer{text-align:center;padding:25px;color:var(--muted);font-size:13px;border-top:1px solid var(--line);background:white}
+@media(max-width:850px){.grid,.gallery-grid{grid-template-columns:repeat(2,1fr)}nav a{margin-left:10px}}
+@media(max-width:520px){nav{align-items:flex-start}.navlinks{display:none}.hero{margin:20px 14px;padding:34px 20px}.wrap{padding:0 14px 35px}.grid,.gallery-grid{gap:11px}.gallery-card img{height:135px}.art{height:115px;font-size:54px}.card-body{padding:12px}.tip{align-items:flex-start;flex-direction:column}}
+
+.dark-mode-btn{border:0;background:var(--purple);color:#fff;padding:10px 14px;border-radius:10px;font-weight:750;cursor:pointer;white-space:nowrap}
+body.dark-mode{background:#171725;color:#f5f4ff}
+body.dark-mode header,body.dark-mode .card,body.dark-mode .gallery-card{background:#252538;color:#f5f4ff;border-color:#393951}
+body.dark-mode nav a,body.dark-mode .section-head p,body.dark-mode .card p,body.dark-mode .gallery-card p{color:#c7c5dc}
+body.dark-mode .hero{background:linear-gradient(120deg,#30294e,#4b2d42)}
+body.dark-mode .hero p{color:#e0dced}
+body.dark-mode .filters .chip{background:#252538;color:#e8e6f5;border-color:#45435d}
+body.dark-mode .filters .chip.active{background:#6c4cf1;color:#fff;border-color:#6c4cf1}
+body.dark-mode .search{background:#252538}
+body.dark-mode .search input{background:transparent;color:#fff}
+body.dark-mode footer{background:#202033;color:#c7c5dc;border-color:#393951}
+body.dark-mode .tip{background:#10101b}
+
+
+.feature-panel,.tutorial-section{margin-top:34px;padding:22px;background:#fff;border:1px solid var(--line);border-radius:18px}
+.feature-panel h2{margin:0 0 7px}.feature-panel p{color:var(--muted);margin:0 0 14px;font-size:14px}
+#artUpload{display:none}.upload-label{display:inline-block;background:var(--purple);color:white;padding:12px 17px;border-radius:10px;font-weight:750;cursor:pointer}
+.upload-note{margin-top:12px!important;font-size:12px!important}
+.tutorial-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.tutorial-card{border:1px solid var(--line);border-radius:15px;padding:18px;background:var(--paper)}
+.tutorial-card>span{font-size:34px}.tutorial-card h3{margin:10px 0 6px}.tutorial-card p{color:var(--muted);font-size:13px;line-height:1.5;min-height:40px}
+
+.online-search-section{margin-top:30px}
+.online-search-section .section-head{margin-bottom:14px}
+.online-credit{font-size:11px;color:var(--muted);line-height:1.4;margin-top:8px}
+.online-result-link{display:inline-block;margin-top:8px;color:var(--purple);font-size:12px;font-weight:750;text-decoration:none}
+.online-result-link:hover{text-decoration:underline}
+.online-loading{padding:16px;color:var(--muted);grid-column:1/-1}
+.gallery-card{position:relative}.gallery-card img{cursor:zoom-in}
+.gallery-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.gallery-actions button{border:1px solid var(--line);background:#fff;color:var(--ink);padding:7px 9px;border-radius:8px;cursor:pointer;font-weight:700;font-size:12px}
+.gallery-actions .favorite-btn.is-favorite{background:#fff0f3;color:#d92f62;border-color:#ffd0dc}
+.modal{display:none;position:fixed;inset:0;z-index:20;background:#10101bcc;align-items:center;justify-content:center;padding:20px}
+.modal.open{display:flex}.modal-content,.image-modal-content{position:relative;background:white;color:#20213a;border-radius:18px;padding:28px;max-width:620px;width:100%;max-height:85vh;overflow:auto}
+.modal-content li{margin:10px 0;line-height:1.5}
+.modal-close{position:absolute;right:12px;top:8px;border:0;background:transparent;font-size:30px;cursor:pointer;color:inherit}
+.image-modal-content{text-align:center;max-width:900px}
+.image-modal-content img{max-width:100%;max-height:70vh;object-fit:contain;border-radius:10px}
+.image-modal-content p{font-weight:750;margin-bottom:0}
+body.dark-mode .feature-panel,body.dark-mode .tutorial-section,body.dark-mode .tutorial-card{background:#252538;color:#f5f4ff;border-color:#393951}
+body.dark-mode .tutorial-card p,body.dark-mode .feature-panel p{color:#c7c5dc}
+body.dark-mode .gallery-actions button{background:#303047;color:#f5f4ff;border-color:#4a4962}
+body.dark-mode .modal-content{background:#252538;color:#f5f4ff}
+@media(max-width:850px){.tutorial-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:520px){.tutorial-grid{grid-template-columns:1fr}.feature-panel,.tutorial-section{padding:16px}}
+
+</style>
+</head>
+<body>
+<header><nav><div class="logo">Draw<span>Hub.</span></div><div class="navlinks"><a href="#explore">Explore</a><a href="#tutorials">Tutorials</a><a href="#upload">Upload</a></div><button id="darkModeBtn" class="dark-mode-btn" type="button">🌙 Dark Mode</button></nav></header>
+<section class="hero">
+<h1>Your next drawing starts here.</h1>
+<p>Explore fun drawing ideas, discover different art styles, and find inspiration for your next masterpiece.</p>
+<div class="search"><input id="search" type="search" placeholder="Search anything: rose, car, anime, tiger, scenery..." aria-label="Search drawing ideas"><button onclick="filterCards()">Search</button></div>
+</section>
+<main class="wrap" id="explore">
+<div class="section-head"><div><h2>Explore drawing styles</h2><p>Choose a category or search for an idea.</p></div></div>
+<div class="pencil-inspiration">
+  <a href="https://example.com" target="_blank" rel="noopener noreferrer">
+    <img src="images/sketch.jpg" alt="Open full gallery" width="300">
+  </a>
+  <!--
+Source - https://stackoverflow.com/q/9129635
+Posted by user690936, modified by community. See post 'Timeline' for change history
+Retrieved 2026-11-17, License - CC BY-SA 3.0
+-->
+<p class="upload-note">Add your own reference images in the images folder to build your personal inspiration gallery.</p>
+</div>
+<div class="filters" id="filters">
+<button class="chip active" data-filter="all">All drawings</button>
+<button class="chip" data-filter="pencil">Pencil art</button>
+<button class="chip" data-filter="anime">Anime</button>
+<button class="chip" data-filter="nature">Nature</button>
+<button class="chip" data-filter="animals">Animals</button>
+<button class="chip" data-filter="birds">🐦 Birds</button>
+<button class="chip" data-filter="sea-animals">🐠 Sea Animals</button>
+<button class="chip" data-filter="easy">Easy drawings</button>
+<button class="chip" data-filter="creative">Creative art</button>
+<button class="chip" data-filter="environments">Environments</button>
+<button class="chip" data-filter="anatomy">Anatomy</button>
+<button class="chip" data-filter="characters">Characters</button>
+<button class="chip" data-filter="favorites">❤️ Favorites</button>
+</div>
+
+<section class="feature-panel" id="upload">
+  <div>
+    <h2>Upload Your Artwork</h2>
+    <p>Choose an image from your device to add it to this gallery.</p>
+  </div>
+  <label class="upload-label" for="artUpload">📸 Choose an artwork</label>
+  <input id="artUpload" type="file" accept="image/*">
+  <p class="upload-note" id="uploadNote">Your image is shown in this browser only; it is not uploaded to a public server.</p>
+</section>
+
+<section class="tutorial-section" id="tutorials">
+  <div class="section-head"><div><h2>Drawing Tutorials</h2><p>Choose a quick beginner-friendly lesson.</p></div></div>
+  <div class="tutorial-grid">
+    <article class="tutorial-card"><span>✏️</span><h3>Basic Pencil Shading</h3><p>Learn light, medium and dark shading with simple shapes.</p><button class="btn tutorial-open" data-tutorial="shading">View steps</button></article>
+    <article class="tutorial-card"><span>👁️</span><h3>Draw an Eye</h3><p>Build an eye from simple outlines, then add details.</p><button class="btn tutorial-open" data-tutorial="eye">View steps</button></article>
+    <article class="tutorial-card"><span>🦊</span><h3>Draw a Cute Fox</h3><p>Use circles and triangles to create a friendly fox.</p><button class="btn tutorial-open" data-tutorial="fox">View steps</button></article>
+  </div>
+</section>
+
+<div class="gallery-grid grid" id="galleryGrid"></div>
+<div class="empty" id="empty">No drawing ideas found. Try another search.</div>
+<section id="onlineSearchSection" class="online-search-section" aria-live="polite">
+  <div class="section-head"><div><h2 id="onlineSearchHeading">Image search</h2><p id="onlineSearchStatus">Type anything in the search box to find matching pictures from Wikimedia Commons.</p></div></div>
+  <div class="gallery-grid grid" id="onlineResults"></div>
+</section>
+<section class="tip" id="tips"><div><strong>Small tip: draw a little every day!</strong><p>Start with simple shapes, use light pencil lines, and enjoy learning at your own pace.</p></div><span style="font-size:42px">✨</span></section>
+</main>
+<footer>DrawHub · Made for curious artists · Keep creating!</footer>
+
+<div class="modal" id="tutorialModal" aria-hidden="true">
+  <div class="modal-content">
+    <button class="modal-close" data-close="tutorialModal" aria-label="Close">×</button>
+    <h2 id="tutorialTitle">Drawing tutorial</h2>
+    <ol id="tutorialSteps"></ol>
+  </div>
+</div>
+<div class="modal image-modal" id="imageModal" aria-hidden="true">
+  <div class="image-modal-content">
+    <button class="modal-close" data-close="imageModal" aria-label="Close">×</button>
+    <img id="largeImage" src="" alt="Full-size artwork">
+    <p id="largeImageTitle"></p>
+  </div>
+</div>
+
+<script>
+// Gallery data: each item has an id, title, category and image URL.
+const galleryItems = [
+  {id:1,title:"Pencil Sketching",category:"pencil",imageUrl:"https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&w=800&q=85"},
+  {id:2,title:"Anime Characters",category:"anime",imageUrl:"https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=800&q=85"},
+  {id:3,title:"Scenery & Landscapes",category:"nature",imageUrl:"https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=800&q=85"},
+  {id:4,title:"Animals & Birds",category:"animals",imageUrl:"https://images.unsplash.com/photo-1543852786-1cf6624b9987?auto=format&fit=crop&w=800&q=85"},
+  {id:5,title:"Flowers & Mandala",category:"easy",imageUrl:"https://images.unsplash.com/photo-1490750967868-88aa4486c946?auto=format&fit=crop&w=800&q=85"},
+  {id:6,title:"Portraits & Eyes",category:"pencil",imageUrl:"https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=85"},
+  {id:7,title:"Buildings & 3D",category:"creative",imageUrl:"https://images.unsplash.com/photo-1487958449943-2429e8be8625?auto=format&fit=crop&w=800&q=85"},
+  {id:8,title:"Fantasy & Space",category:"creative",imageUrl:"https://images.unsplash.com/photo-1462331940025-496dfbfc7564?auto=format&fit=crop&w=800&q=85"},
+  {id:9,title:"Cute Doodles",category:"easy",imageUrl:"https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?auto=format&fit=crop&w=800&q=85"},
+  {id:10,title:"Tree & Leaf Studies",category:"nature",imageUrl:"https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=800&q=85"},
+  {id:11,title:"Comics & Heroes",category:"anime",imageUrl:"https://images.unsplash.com/photo-1612036782180-6f0b6cd846fe?auto=format&fit=crop&w=800&q=85"},
+  {id:12,title:"Color & Abstract Art",category:"creative",imageUrl:"https://images.unsplash.com/photo-1541961017774-22349e4a1262?auto=format&fit=crop&w=800&q=85"},
+  {
+    id: 13,
+    title: "Cyberpunk Alleyway",
+    category: "environments",
+    imageUrl: "https://example.com",
+    difficulty: "Hard"
+  },
+  {
+    id: 14,
+    title: "Dynamic Hand Poses",
+    category: "anatomy",
+    imageUrl: "https://example.com",
+    difficulty: "Medium"
+  },
+  {
+    id: 15,
+    title: "Stylized Fox Character",
+    category: "characters",
+    imageUrl: "https://example.com",
+    difficulty: "Easy"
+  },
+  {id:16,title:"Lion",category:"animals",imageUrl:"images/animals/lion.jpg",difficulty:"Easy"},
+  {id:17,title:"Tiger",category:"animals",imageUrl:"images/animals/tiger.jpg",difficulty:"Easy"},
+  {id:18,title:"Elephant",category:"animals",imageUrl:"images/animals/elephant.jpg",difficulty:"Easy"},
+  {id:19,title:"Fox",category:"animals",imageUrl:"images/animals/fox.jpg",difficulty:"Easy"},
+  {id:20,title:"Dog",category:"animals",imageUrl:"images/animals/dog.jpg",difficulty:"Easy"},
+  {id:21,title:"Cat",category:"animals",imageUrl:"images/animals/cat.jpg",difficulty:"Easy"},
+  {id:22,title:"Horse",category:"animals",imageUrl:"images/animals/horse.jpg",difficulty:"Easy"},
+  {id:23,title:"Deer",category:"animals",imageUrl:"images/animals/deer.jpg",difficulty:"Easy"},
+  {id:24,title:"Bear",category:"animals",imageUrl:"images/animals/bear.jpg",difficulty:"Easy"},
+  {id:25,title:"Panda",category:"animals",imageUrl:"images/animals/panda.jpg",difficulty:"Easy"},
+  {id:26,title:"Giraffe",category:"animals",imageUrl:"images/animals/giraffe.jpg",difficulty:"Easy"},
+  {id:27,title:"Zebra",category:"animals",imageUrl:"images/animals/zebra.jpg",difficulty:"Easy"},
+  {id:28,title:"Monkey",category:"animals",imageUrl:"images/animals/monkey.jpg",difficulty:"Easy"},
+  {id:29,title:"Wolf",category:"animals",imageUrl:"images/animals/wolf.jpg",difficulty:"Easy"},
+  {id:30,title:"Rabbit",category:"animals",imageUrl:"images/animals/rabbit.jpg",difficulty:"Easy"},
+  {id:31,title:"Squirrel",category:"animals",imageUrl:"images/animals/squirrel.jpg",difficulty:"Easy"},
+  {id:32,title:"Kangaroo",category:"animals",imageUrl:"images/animals/kangaroo.jpg",difficulty:"Easy"},
+  {id:33,title:"Koala",category:"animals",imageUrl:"images/animals/koala.jpg",difficulty:"Easy"},
+  {id:34,title:"Leopard",category:"animals",imageUrl:"images/animals/leopard.jpg",difficulty:"Easy"},
+  {id:35,title:"Cheetah",category:"animals",imageUrl:"images/animals/cheetah.jpg",difficulty:"Easy"},
+  {id:36,title:"Rhinoceros",category:"animals",imageUrl:"images/animals/rhinoceros.jpg",difficulty:"Easy"},
+  {id:37,title:"Hippopotamus",category:"animals",imageUrl:"images/animals/hippopotamus.jpg",difficulty:"Easy"},
+  {id:38,title:"Crocodile",category:"animals",imageUrl:"images/animals/crocodile.jpg",difficulty:"Easy"},
+  {id:39,title:"Turtle",category:"animals",imageUrl:"images/animals/turtle.jpg",difficulty:"Easy"},
+  {id:40,title:"Dolphin",category:"animals",imageUrl:"images/animals/dolphin.jpg",difficulty:"Easy"},
+  {id:41,title:"Peacock",category:"birds",imageUrl:"images/birds/peacock.jpg",difficulty:"Easy"},
+  {id:42,title:"Parrot",category:"birds",imageUrl:"images/birds/parrot.jpg",difficulty:"Easy"},
+  {id:43,title:"Eagle",category:"birds",imageUrl:"images/birds/eagle.jpg",difficulty:"Easy"},
+  {id:44,title:"Owl",category:"birds",imageUrl:"images/birds/owl.jpg",difficulty:"Easy"},
+  {id:45,title:"Pigeon",category:"birds",imageUrl:"images/birds/pigeon.jpg",difficulty:"Easy"},
+  {id:46,title:"Sparrow",category:"birds",imageUrl:"images/birds/sparrow.jpg",difficulty:"Easy"},
+  {id:47,title:"Kingfisher",category:"birds",imageUrl:"images/birds/kingfisher.jpg",difficulty:"Easy"},
+  {id:48,title:"Flamingo",category:"birds",imageUrl:"images/birds/flamingo.jpg",difficulty:"Easy"},
+  {id:49,title:"Swan",category:"birds",imageUrl:"images/birds/swan.jpg",difficulty:"Easy"},
+  {id:50,title:"Duck",category:"birds",imageUrl:"images/birds/duck.jpg",difficulty:"Easy"},
+  {id:51,title:"Hen",category:"birds",imageUrl:"images/birds/hen.jpg",difficulty:"Easy"},
+  {id:52,title:"Rooster",category:"birds",imageUrl:"images/birds/rooster.jpg",difficulty:"Easy"},
+  {id:53,title:"Crow",category:"birds",imageUrl:"images/birds/crow.jpg",difficulty:"Easy"},
+  {id:54,title:"Woodpecker",category:"birds",imageUrl:"images/birds/woodpecker.jpg",difficulty:"Easy"},
+  {id:55,title:"Hummingbird",category:"birds",imageUrl:"images/birds/hummingbird.jpg",difficulty:"Easy"},
+  {id:56,title:"Penguin",category:"birds",imageUrl:"images/birds/penguin.jpg",difficulty:"Easy"},
+  {id:57,title:"Toucan",category:"birds",imageUrl:"images/birds/toucan.jpg",difficulty:"Easy"},
+  {id:58,title:"Macaw",category:"birds",imageUrl:"images/birds/macaw.jpg",difficulty:"Easy"},
+  {id:59,title:"Pelican",category:"birds",imageUrl:"images/birds/pelican.jpg",difficulty:"Easy"},
+  {id:60,title:"Stork",category:"birds",imageUrl:"images/birds/stork.jpg",difficulty:"Easy"},
+  {id:61,title:"Crane",category:"birds",imageUrl:"images/birds/crane.jpg",difficulty:"Easy"},
+  {id:62,title:"Seagull",category:"birds",imageUrl:"images/birds/seagull.jpg",difficulty:"Easy"},
+  {id:63,title:"Falcon",category:"birds",imageUrl:"images/birds/falcon.jpg",difficulty:"Easy"},
+  {id:64,title:"Heron",category:"birds",imageUrl:"images/birds/heron.jpg",difficulty:"Easy"},
+  {id:65,title:"Nightingale",category:"birds",imageUrl:"images/birds/nightingale.jpg",difficulty:"Easy"}
+];
+
+const gridContainer = document.querySelector('.gallery-grid');
+const searchInput = document.getElementById('search');
+const chips = [...document.querySelectorAll('.chip')];
+const emptyMessage = document.getElementById('empty');
+const artUpload = document.getElementById('artUpload');
+const uploadNote = document.getElementById('uploadNote');
+
+let activeCategory = 'all';
+let favorites = JSON.parse(localStorage.getItem('drawhubFavorites') || '[]');
+
+function saveFavorites() {
+  localStorage.setItem('drawhubFavorites', JSON.stringify(favorites));
+}
+
+function renderGallery(selectedCategory = activeCategory) {
+  activeCategory = selectedCategory;
+  const query = searchInput.value.trim().toLowerCase();
+
+  let filteredItems = galleryItems.filter(item => {
+    const categoryMatch =
+      selectedCategory === 'all' ||
+      (selectedCategory === 'favorites' && favorites.includes(item.id)) ||
+      item.category === selectedCategory;
+
+    const searchMatch =
+      item.title.toLowerCase().includes(query) ||
+      item.category.toLowerCase().includes(query);
+
+    return categoryMatch && searchMatch;
+  });
+
+  gridContainer.innerHTML = filteredItems.map(item => `
+    <article class="gallery-card" data-id="${item.id}">
+      <img src="${item.imageUrl}" alt="${item.title}" loading="lazy"
+           data-image-id="${item.id}" onerror="this.style.display='none'">
+      <div class="card-info">
+        <h3>${item.title}</h3>
+        <span class="badge">${item.category}</span>
+        <span class="difficulty">${item.difficulty || "Beginner-friendly"}</span>
+        <div class="gallery-actions">
+          <button class="favorite-btn ${favorites.includes(item.id) ? 'is-favorite' : ''}"
+                  data-favorite-id="${item.id}">
+            ${favorites.includes(item.id) ? '♥ Saved' : '♡ Favourite'}
+          </button>
+          <button class="tutorial-for-item" data-item-title="${item.title}">✏️ Tutorial</button>
+        </div>
+      </div>
+    </article>
+  `).join('');
+
+  emptyMessage.style.display = filteredItems.length ? 'none' : 'block';
+}
+
+// Category filters.
+chips.forEach(chip => {
+  chip.addEventListener('click', () => {
+    chips.forEach(button => button.classList.remove('active'));
+    chip.classList.add('active');
+    renderGallery(chip.dataset.filter);
+    const category = chip.dataset.filter;
+    const onlineQuery = category === 'animals' ? 'animals wildlife animal pictures' :
+      category === 'birds' ? 'birds bird pictures' :
+      category === 'sea-animals' ? 'sea animals marine wildlife' : '';
+    if (onlineQuery) {
+      clearTimeout(onlineSearchTimer);
+      lastOnlineQuery = '';
+      searchOnlineImages(onlineQuery);
+    }
+  });
+});
+
+
+let onlineSearchTimer;
+let lastOnlineQuery = '';
+
+searchInput.addEventListener('input', () => {
+  renderGallery(activeCategory);
+  clearTimeout(onlineSearchTimer);
+  const query = searchInput.value.trim();
+  if (!query) {
+    document.getElementById('onlineResults').innerHTML = '';
+    document.getElementById('onlineSearchHeading').textContent = 'Image search';
+    document.getElementById('onlineSearchStatus').textContent =
+      'Type anything in the search box to find matching pictures from Wikimedia Commons.';
+    lastOnlineQuery = '';
+    return;
+  }
+  onlineSearchTimer = setTimeout(() => searchOnlineImages(query), 550);
+});
+
+async function searchOnlineImages(query) {
+  if (!query || query === lastOnlineQuery) return;
+  lastOnlineQuery = query;
+  const resultsBox = document.getElementById('onlineResults');
+  const status = document.getElementById('onlineSearchStatus');
+  document.getElementById('onlineSearchHeading').textContent =
+    'Online image results for "' + query + '"';
+  status.textContent = 'Searching Wikimedia Commons…';
+  resultsBox.innerHTML = '<div class="online-loading">🔎 Finding pictures…</div>';
+
+  const apiUrl = 'https://commons.wikimedia.org/w/api.php?action=query&generator=search' +
+    '&gsrsearch=' + encodeURIComponent(query) +
+    '&gsrnamespace=6&gsrlimit=24&prop=imageinfo&iiprop=url%7Cextmetadata' +
+    '&iiurlwidth=500&format=json&origin=*';
+
+  try {
+    const response = await fetch(apiUrl);
+    if (!response.ok) throw new Error('Image search is temporarily unavailable.');
+    const data = await response.json();
+    const pages = Object.values(data.query?.pages || {});
+    const imagePages = pages.filter(page =>
+      page.imageinfo && page.imageinfo[0] &&
+      page.imageinfo[0].thumburl
+    );
+
+    resultsBox.innerHTML = '';
+    if (!imagePages.length) {
+      status.textContent = 'No matching images found. Try another word.';
+      return;
+    }
+
+    status.textContent = imagePages.length + ' matching images found. Images are provided by Wikimedia Commons.';
+    imagePages.forEach(page => {
+      const info = page.imageinfo[0];
+      const card = document.createElement('article');
+      card.className = 'gallery-card';
+
+      const image = document.createElement('img');
+      image.src = info.thumburl;
+      image.alt = page.title.replace(/^File:/, '').replace(/_/g, ' ');
+      image.loading = 'lazy';
+      image.addEventListener('click', () => {
+        document.getElementById('largeImage').src = info.thumburl;
+        document.getElementById('largeImageTitle').textContent = image.alt;
+        openModal('imageModal');
+      });
+
+      const body = document.createElement('div');
+      body.className = 'card-info';
+      const title = document.createElement('h3');
+      title.textContent = image.alt;
+      const credit = document.createElement('p');
+      credit.className = 'online-credit';
+      const artist = info.extmetadata?.Artist?.value || 'Wikimedia Commons contributor';
+      const license = info.extmetadata?.LicenseShortName?.value || 'See source page for license';
+      credit.textContent = 'By ' + artist.replace(/<[^>]*>/g, '').slice(0, 120) +
+        ' · ' + license.replace(/<[^>]*>/g, '').slice(0, 60);
+
+      const source = document.createElement('a');
+      source.className = 'online-result-link';
+      source.href = page.fullurl || ('https://commons.wikimedia.org/wiki/' + encodeURIComponent(page.title.replace(/ /g, '_')));
+      source.target = '_blank';
+      source.rel = 'noopener noreferrer';
+      source.textContent = 'View source & licence ↗';
+
+      body.append(title, credit, source);
+      card.append(image, body);
+      resultsBox.appendChild(card);
+    });
+  } catch (error) {
+    resultsBox.innerHTML = '';
+    status.textContent = 'Could not load online images. Check your internet connection and try again.';
+  }
+}
+
+
+function filterCards() {
+  renderGallery(activeCategory);
+  const query = searchInput.value.trim();
+  if (query) {
+    clearTimeout(onlineSearchTimer);
+    lastOnlineQuery = '';
+    searchOnlineImages(query);
+  }
+}
+
+// Favourite buttons and full-screen image preview use event delegation.
+gridContainer.addEventListener('click', event => {
+  const favoriteButton = event.target.closest('[data-favorite-id]');
+  if (favoriteButton) {
+    const id = Number(favoriteButton.dataset.favoriteId);
+    favorites = favorites.includes(id)
+      ? favorites.filter(savedId => savedId !== id)
+      : [...favorites, id];
+    saveFavorites();
+    renderGallery(activeCategory);
+    return;
+  }
+
+  const image = event.target.closest('[data-image-id]');
+  if (image) {
+    document.getElementById('largeImage').src = image.src;
+    document.getElementById('largeImageTitle').textContent =
+      image.alt + ' — click outside the image or × to close';
+    openModal('imageModal');
+    return;
+  }
+
+  const tutorialButton = event.target.closest('.tutorial-for-item');
+  if (tutorialButton) {
+    showTutorial('shading', tutorialButton.dataset.itemTitle);
+  }
+});
+
+// Upload a picture from the user's device and add it to this browser's gallery.
+artUpload.addEventListener('change', event => {
+  const file = event.target.files[0];
+  if (!file) return;
+  if (!file.type.startsWith('image/')) {
+    uploadNote.textContent = 'Please choose an image file.';
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = () => {
+    const newItem = {
+      id: Date.now(),
+      title: file.name.replace(/\.[^.]+$/, ''),
+      category: 'my artwork',
+      imageUrl: reader.result,
+      difficulty: 'Your upload'
+    };
+    galleryItems.unshift(newItem);
+    chips.forEach(button => button.classList.remove('active'));
+    document.querySelector('[data-filter="all"]').classList.add('active');
+    searchInput.value = '';
+    renderGallery('all');
+    uploadNote.textContent = 'Your artwork has been added to this gallery in this browser session.';
+    artUpload.value = '';
+  };
+  reader.readAsDataURL(file);
+});
+
+// Modal helpers.
+function openModal(id) {
+  const modal = document.getElementById(id);
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden', 'false');
+}
+function closeModal(id) {
+  const modal = document.getElementById(id);
+  modal.classList.remove('open');
+  modal.setAttribute('aria-hidden', 'true');
+}
+
+const tutorialContent = {
+  shading: {
+    title: 'Basic Pencil Shading',
+    steps: [
+      'Draw a simple circle or cube using light pencil lines.',
+      'Choose where the light is coming from.',
+      'Shade the opposite side lightly, then gradually make it darker.',
+      'Blend gently with a tissue or blending tool if you have one.',
+      'Keep the brightest area light to show the highlight.'
+    ]
+  },
+  eye: {
+    title: 'Draw an Eye',
+    steps: [
+      'Draw a light almond-shaped outline.',
+      'Add a circle for the iris and a smaller circle for the pupil.',
+      'Draw the upper eyelid and a soft lower eyelid line.',
+      'Shade the iris, leaving a small white highlight.',
+      'Add short eyelashes and gently shade around the eye.'
+    ]
+  },
+  fox: {
+    title: 'Draw a Cute Fox',
+    steps: [
+      'Draw a circle for the head and a smaller oval for the body.',
+      'Add two triangle-shaped ears on top of the head.',
+      'Sketch a pointed muzzle and a small nose.',
+      'Add eyes, legs and a fluffy tail.',
+      'Outline the drawing and colour the fox orange, white and brown.'
+    ]
+  }
+};
+
+function showTutorial(type, customTitle) {
+  const lesson = tutorialContent[type] || tutorialContent.shading;
+  document.getElementById('tutorialTitle').textContent =
+    customTitle ? customTitle + ' — Drawing tips' : lesson.title;
+  const steps = lesson.steps;
+  document.getElementById('tutorialSteps').innerHTML =
+    steps.map(step => `<li>${step}</li>`).join('');
+  openModal('tutorialModal');
+}
+
+document.querySelectorAll('.tutorial-open').forEach(button => {
+  button.addEventListener('click', () => showTutorial(button.dataset.tutorial));
+});
+
+document.querySelectorAll('[data-close]').forEach(button => {
+  button.addEventListener('click', () => closeModal(button.dataset.close));
+});
+document.querySelectorAll('.modal').forEach(modal => {
+  modal.addEventListener('click', event => {
+    if (event.target === modal) closeModal(modal.id);
+  });
+});
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape') {
+    closeModal('tutorialModal');
+    closeModal('imageModal');
+  }
+});
+
+// Initial gallery load.
+renderGallery('all');
+
+// Dark mode toggle.
+const darkModeBtn = document.getElementById("darkModeBtn");
+if (darkModeBtn) {
+  darkModeBtn.addEventListener("click", () => {
+    document.body.classList.toggle("dark-mode");
+    darkModeBtn.textContent = document.body.classList.contains("dark-mode")
+      ? "☀️ Light Mode"
+      : "🌙 Dark Mode";
+  });
+}
+
+</script>
+</body>
+</html>
